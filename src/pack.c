@@ -256,6 +256,8 @@ int pack_refresh(void *packed, int message_id) {
     int packedIndex = initalize(packed, packageType);
 
     *(int *)(packed + packedIndex) = message_id;
+
+    printf("%s%d", "Message recieved, with ID ", message_id);
     
     return packageType;
 }
