@@ -235,14 +235,13 @@ int pack(void *packed, char *input) {
         
         *(int *)(packed + packedLoc) = 0;
         packedLoc += intPad;
-        
+
         return type;
     }
 
     puts("How did you get here? This is quite impressive.");
     return -1;
 }
-
 /* Create a refresh packet for the given message ID.  You can assume
  * that packed is a buffer of size PACKET_SIZE.
  *
@@ -251,13 +250,29 @@ int pack(void *packed, char *input) {
  * Returns the message type.
  */
 int pack_refresh(void *packed, int message_id) {
-    char packageType = 0; /* The package type for this function will always be zero */
+    int i;
+    int *vtype, *vmid;
+    char *vubit;
 
-    int packedIndex = initalize(packed, packageType);
-
-    *(int *)(packed + packedIndex) = message_id;
-
-    printf("%s%d", "Message recieved, with ID ", message_id);
+    vtype = (int *)packed;
+    vtype[0] = REFRESH;
+    packed = packed + sizeof(int);
     
-    return packageType;
+    vubit = (char *)packed;   
+    vubit[0] = 'a';
+    vubit[1] = 'm';
+    vubit[2] = 'z';
+    vubit[3] = 'h';
+    vubit[4] = 'o';
+    vubit[5] = 'u';
+    
+    for(i = 6; i != NAME_SIZE; i++){
+        vubit[i] = '\0';
+    }
+    
+    packed = packed + (sizeof(char) * NAME_SIZE);
+    vmid = (int *)packed;
+    vmid[0] = message_id;
+    
+    return REFRESH;
 }
