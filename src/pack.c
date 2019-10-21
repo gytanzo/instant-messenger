@@ -20,10 +20,18 @@ int initalize(void *packed, int type){ /* Sets the first 19 elements of packed *
     *(int *)(packed + packedIndex) = type;
     packedIndex = intPad;
 
-    while (ubitIndex != NAME_SIZE - 1){ 
-        *(char *)(packed + packedIndex) = UBIT[ubitIndex];
-        packedIndex++;
-        ubitIndex++;
+    while (ubitIndex != NAME_SIZE - 1){
+        size_t nameLength = strlen(UBIT);
+        if (ubitIndex <= nameLength - 1){
+            *(char *)(packed + packedIndex) = UBIT[ubitIndex];
+            ubitIndex++;
+            packedIndex++;
+        }
+        else {
+            *(char *)(packed + packedIndex) = '\0';
+            ubitIndex++;
+            packedIndex++;
+        }
     }
 
     if (packedIndex != 19){
@@ -98,10 +106,10 @@ int inputCheck(char *input) {
                 i = 17;
             }
         }
+        
+        
+        labelIndex = index - 1; /* labelIndex returns the index at which the target ENDS (the 'b' in elb) */
 
-
-		labelIndex = index - 1; /* labelIndex returns the index at which the target ENDS (the 'b' in elb) */
-		
         if (index == -1){
             puts("Error: The username you provided is too long.");
             return -1;
@@ -112,18 +120,15 @@ int inputCheck(char *input) {
 
     else if (input[0] == '/' && input[1] == 's' && input[2] == 't' && input[3] == 'a' && input[4] == 't' && input[5] == 's'){
         int length = strlen(input);
-        if (length > 7){
-            puts("Error: '/stats' call too long.");
-            return -1;
+        
+        for (int i = 6; i <= length - 1; i++){
+            if (input[i] != ' '){
+                puts("Error: Invalid character following the '/stats'.");
+                return -1;
+            }
         }
         
-        if (input[6] != ' '){
-            puts("Error: Invalid character following the '/stats'.");
-            return -1;
-        }
-        else {
-            return 4; /* This is a statistics message. */
-        }
+        return 4; /* This is a statistics message. */
     }
 
     else {
@@ -170,7 +175,7 @@ int pack(void *packed, char *input) {
         
         return type;
     }
-
+    
     else if (type == 2){ /* Normal message */
         *(size_t *)(packed + packedLoc) = length;
         packedLoc += sizeTPad;
@@ -185,8 +190,8 @@ int pack(void *packed, char *input) {
         
         return type;
     }
-	
-	else if (type == 3){ /* Labeled message */
+    
+    else if (type == 3){ /* Labeled message */
         *(size_t *)(packed + packedLoc) = length - 1 - (labelIndex + 1); /* The '@' char adds an extra index */
         packedLoc += sizeTPad;
         
@@ -210,8 +215,8 @@ int pack(void *packed, char *input) {
         
         return type;
     }
-	
-	else if (type == 4){ /* Stats message */
+    
+    else if (type == 4){ /* Stats message */
         int activeIndex = 0;
         while (activeIndex != NAME_SIZE - 1){ 
             *(char *)(packed + packedLoc) = mostActive[activeIndex];
