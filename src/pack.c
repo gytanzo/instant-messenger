@@ -77,7 +77,7 @@ int inputCheck(char *input) {
             return -1;
         }
         
-        for (int i = 3; i < length - 1; i++){ /* 3 represents the length of a "/me" */
+        for (int i = 3; i < length; i++){ /* 3 represents the length of a "/me" */
             if (input[i] != ' '){
                 check = 0;
             }
@@ -115,7 +115,7 @@ int inputCheck(char *input) {
             return -1;
         }
         
-        return STATUS; /* This is a labeled message. */
+        return LABELED; /* This is a labeled message. */
     }
 
     else if (input[0] == '/' && input[1] == 's' && input[2] == 't' && input[3] == 'a' && input[4] == 't' && input[5] == 's'){
@@ -155,7 +155,7 @@ int pack(void *packed, char *input) {
         return -1; /* Invalid input (I would have already printed the error code, so I won't add one here). */
     }
 
-    else if (type == 1){ /* Status message */
+    else if (type == STATUS){ /* Status message */
         int statusHead = 3; /* As stated previously, 3 represents the length of "/me" */
         while (input[statusHead] == ' '){
             statusHead++;
@@ -176,7 +176,7 @@ int pack(void *packed, char *input) {
         return type;
     }
     
-    else if (type == 2){ /* Normal message */
+    else if (type == MESSAGE){ /* Normal message */
         *(size_t *)(packed + packedLoc) = length;
         packedLoc += sizeTPad;
 
@@ -191,7 +191,7 @@ int pack(void *packed, char *input) {
         return type;
     }
     
-    else if (type == 3){ /* Labeled message */
+    else if (type == LABELED){ /* Labeled message */
         *(size_t *)(packed + packedLoc) = length - 1 - (labelIndex + 1); /* The '@' char adds an extra index */
         packedLoc += sizeTPad;
         
@@ -216,7 +216,7 @@ int pack(void *packed, char *input) {
         return type;
     }
     
-    else if (type == 4){ /* Stats message */
+    else if (type == STATISTICS){ /* Stats message */
         int activeIndex = 0;
         while (activeIndex != NAME_SIZE - 1){ 
             *(char *)(packed + packedLoc) = mostActive[activeIndex];
@@ -251,7 +251,7 @@ int pack(void *packed, char *input) {
  * Returns the message type.
  */
 int pack_refresh(void *packed, int message_id) {
-    char packageType = REFRESH; /* The package type for this function will always be zero */
+    char packageType = REFRESH;
 
     int packedIndex = initalize(packed, packageType);
 
