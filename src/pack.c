@@ -17,12 +17,12 @@ int initalize(void *packed, int type){ /* Sets the first 19 elements of packed *
     int ubitIndex = 0; /* Keeps track of where in the UBIT array I am */
     int packedIndex = 0; /* Keeps track where in packed I am*/
 
-    *(int *)(packed + packedIndex) = type;
+    *(int *)(packed) = type;
     packedIndex = intPad;
 
-    while (ubitIndex != NAME_SIZE - 1){
-        size_t nameLength = strlen(UBIT);
-        if (ubitIndex <= nameLength - 1){
+    while (ubitIndex != NAME_SIZE){
+        int nameLength = strlen(UBIT);
+        if (ubitIndex <= nameLength){
             *(char *)(packed + packedIndex) = UBIT[ubitIndex];
             ubitIndex++;
             packedIndex++;
@@ -34,13 +34,13 @@ int initalize(void *packed, int type){ /* Sets the first 19 elements of packed *
         }
     }
 
-    if (packedIndex != 19){
+    if (packedIndex != 20){
         printf("%s%d%s\n", "Error: packedIndex has a value of ", packedIndex, " when it should be 19.");
         return 0;
     }
 
     else {
-        return packedIndex + 1; /* returns a value pointing to the next index, which SHOULD be 19 */
+        return packedIndex; /* returns a value pointing to the next index, which SHOULD be 19 */
     }
 }
 
@@ -89,7 +89,7 @@ int inputCheck(char *input) {
         }
         
         else {
-            return 1; /* This is a status message. */
+            return STATUS; /* This is a status message. */
         }
     }
 
@@ -115,7 +115,7 @@ int inputCheck(char *input) {
             return -1;
         }
         
-        return 3; /* This is a labeled message. */
+        return STATUS; /* This is a labeled message. */
     }
 
     else if (input[0] == '/' && input[1] == 's' && input[2] == 't' && input[3] == 'a' && input[4] == 't' && input[5] == 's'){
@@ -128,11 +128,11 @@ int inputCheck(char *input) {
             }
         }
         
-        return 4; /* This is a statistics message. */
+        return STATISTICS; /* This is a statistics message. */
     }
 
     else {
-        return 2; /* This is a plain message. */
+        return MESSAGE; /* This is a plain message. */
     }
 
     puts("Error: Reached end of inputCheck.");
@@ -242,6 +242,7 @@ int pack(void *packed, char *input) {
     puts("How did you get here? This is quite impressive.");
     return -1;
 }
+
 /* Create a refresh packet for the given message ID.  You can assume
  * that packed is a buffer of size PACKET_SIZE.
  *
@@ -250,29 +251,11 @@ int pack(void *packed, char *input) {
  * Returns the message type.
  */
 int pack_refresh(void *packed, int message_id) {
-    int i;
-    int *vtype, *vmid;
-    char *vubit;
+    char packageType = REFRESH; /* The package type for this function will always be zero */
 
-    vtype = (int *)packed;
-    vtype[0] = REFRESH;
-    packed = packed + sizeof(int);
+    int packedIndex = initalize(packed, packageType);
+
+    *(int *)(packed + packedIndex) = message_id;
     
-    vubit = (char *)packed;   
-    vubit[0] = 'a';
-    vubit[1] = 'm';
-    vubit[2] = 'z';
-    vubit[3] = 'h';
-    vubit[4] = 'o';
-    vubit[5] = 'u';
-    
-    for(i = 6; i != NAME_SIZE; i++){
-        vubit[i] = '\0';
-    }
-    
-    packed = packed + (sizeof(char) * NAME_SIZE);
-    vmid = (int *)packed;
-    vmid[0] = message_id;
-    
-    return REFRESH;
+    return packageType;
 }
